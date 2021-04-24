@@ -1,0 +1,182 @@
+<!DOCTYPE html lang="en-US"> 
+
+    <title>
+        My player
+    </title>
+    <body>
+        <div id="mySongList">My Song List<ol></ol></div>
+        <div>
+            <div id="currentplay"></div>
+            <audio id="myplayer" preload="metadata"></audio>
+        </div>
+        <div>
+            <button onclick="myAudioPlayer.playPrevious()">Previous</button>
+            <button id="playButton" onclick="myAudioPlayer.playSong()">Play</button>
+            <button onclick="myAudioPlayer.playNext()">Next</button>
+            <button onclick="myAudioPlayer.muteSound()">Mute</button>
+            <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
+            Volume:  <input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+        </div>
+    </body>
+    <script>
+
+        class AudioPlayer {
+
+            duration_sec = 0
+            current_play_sec = 0
+            trackIndex = 0
+            myTrack = null
+            audioElement = null
+            songStarted = false
+            songList = null
+
+            constructor(myTrack) {
+
+                this.myTrack = myTrack
+                this.audioElement = document.getElementById("myplayer")
+
+                this.loadSongMenu()
+                this.trackAction()
+            }
+
+            loadSongMenu() {
+
+               this.songList = document.getElementById("mySongList").children[0]
+               for (let i = 0; i < this.myTrack.length; i++) {
+                   this.songList.innerHTML += `<li><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
+                   
+               }
+            }
+
+            changeVolume(value) {
+                this.audioElement.volume = value/100
+            }
+
+            displayTime() {
+                document.getElementById("time_slider").value = parseInt((this.audioElement.currentTime/this.audioElement.duration) * 100)
+            }
+
+            loadSong() {
+                if (!((this.trackIndex >= this.myTrack.length) || (this.trackIndex < 0))) {
+                    this.songStarted = true 
+
+                    this.audioElement.src = this.myTrack[this.trackIndex]
+                    this.audioElement.volume = 0.5
+                    this.audioElement.play()
+ 
+                    this.changeColor(this.trackIndex)
+                    
+                    this.audioElement.onloadedmetadata = (event) => {
+                        this.duration_sec = this.audioElement.duration
+                        this.duration_sec = parseInt(this.duration_sec / 60) + ":" + parseInt(this.duration_sec % 60)
+                    }
+                    
+                    this.audioElement.ontimeupdate = (event) => {
+                        this.current_play_sec = this.audioElement.currentTime
+                        document.getElementById("currentplay").innerHTML = parseInt(this.current_play_sec /60) + 
+                            ":" + String(parseInt(this.current_play_sec % 60)).padStart(2, "0") 
+                            + " / " + this.duration_sec
+                    }
+                    
+                    this.audioElement.onended = (event) => {
+                        if (this.trackIndex < this.myTrack.length) {
+                            this.songStarted = false
+                            this.playNext()
+                        }
+                    }
+                }
+            }
+
+            changeTrack(trackNumber) {
+                this.songStarted = false
+                this.trackIndex = trackNumber
+            }
+
+            playSong() {
+                if (this.songStarted) {
+                    this.pauseSong()
+
+                } else {
+
+                    this.loadSong()
+                }
+            }
+
+            muteSound() {
+                this.audioElement.muted = !this.audioElement.muted
+            }
+
+            playNext() {
+                if (this.trackIndex >= this.myTrack.length - 1) {
+                    console.log("Exceed")
+                    this.trackIndex = 0
+
+                } else {
+                    this.songStarted= false
+                    this.trackIndex++
+                    this.playSong()
+                }
+            }
+
+            playPrevious() {
+
+                if (this.trackIndex < 0) {
+                    console.log("No more")
+                    this.trackIndex = 0
+
+                } else {
+                    this.songStarted = false
+                    this.trackIndex--
+                    this.playSong()
+
+                }
+            }
+
+            pauseSong() {
+
+                if (!this.audioElement.paused) {
+                    document.getElementById("playButton").innerHTML = "Pause"
+                    this.audioElement.pause()
+
+                } else {
+                    document.getElementById("playButton").innerHTML = "Play"
+                    this.audioElement.play()
+                }
+            }
+
+            changeColor(index) {
+            
+                for (let i = 0; i < this.songList.children.length; i++) {
+                    this.songList.children[i].style.backgroundColor = "white"
+                }
+
+                this.songList.children[index].style.backgroundColor = "red"
+
+            }
+
+            trackAction() {
+                let songMenu = document.getElementsByTagName("a")
+        
+                for (let i = 0; i < songMenu.length; i++) {
+                    songMenu[i].onclick = function() {
+                        myAudioPlayer.changeTrack(i)
+                        myAudioPlayer.playSong()
+                    }
+                }
+            }
+
+        }
+
+        let myTrack = [
+            "time.flac",
+            "one_last_kiss.flac",
+            "桜流し (2021 Remastered).flac",
+            "Merry Christmas Mr Lawrence - FYI.flac",
+            "Come Back To Me.flac",
+            "Prisoner Of Love.flac"
+        ]
+        
+        let myAudioPlayer = new AudioPlayer(myTrack)
+
+    </script>
+</html>
