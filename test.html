@@ -97,7 +97,6 @@
                     this.pauseSong()
 
                 } else {
-
                     this.loadSong()
                 }
             }
@@ -150,8 +149,9 @@
                     this.songList.children[i].style.backgroundColor = "white"
                 }
 
-                this.songList.children[index].style.backgroundColor = "red"
-
+                if (index < this.songList.children.length) {
+                    this.songList.children[index].style.backgroundColor = "red"
+                }
             }
 
             trackAction() {
