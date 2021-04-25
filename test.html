@@ -50,9 +50,7 @@
             margin-top: 100px;
             text-align:center;
         }
-        #mySongList.h3 {
-            border: solid;
-        }
+        
     </style>
     <body>
         <div class="container-md">
@@ -82,9 +80,6 @@
                 </div>
             </div> 
         </div>
-        <div class="container-md">
-              
-        </div>  
     </body>
     <script>
 
@@ -97,6 +92,8 @@
             audioElement = null
             songStarted = false
             songList = null
+            space_grap = "   *"
+            plotted = false
 
             constructor(myTrack) {
 
@@ -146,8 +143,22 @@
                     
                     this.audioElement.ontimeupdate = (event) => {
                         this.current_play_sec = this.audioElement.currentTime
+
+                        if (parseInt(this.current_play_sec) % 45 == 0) {
+
+                            if (!this.plotted) {
+                                this.space_grap += "*"
+                                this.plotted = !this.plotted
+                            }
+                               
+                        } else {
+                            if(this.plotted) {
+                                this.plotted = false
+                            }
+                        }
+
                         document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0] + 
-                            "<span>     </span>" +  
+                            this.space_grap +  " " + 
                             parseInt(this.current_play_sec /60) + 
                             ":" + 
                             String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
@@ -157,6 +168,7 @@
                     this.audioElement.onended = (event) => {
                         if (this.trackIndex < this.myTrack.length) {
                             //this.songStarted = false
+                            this.space_grap = "   *"
                             this.playNext()
                         }
                     }
@@ -191,6 +203,7 @@
                     this.trackIndex++
                     this.playSong()
                 }
+                this.space_grap = "   *"
             }
 
             playPrevious() {
@@ -204,6 +217,7 @@
                     this.playSong()
 
                 }
+                this.space_grap = "   *"
             }
 
             pauseSong() {
@@ -230,11 +244,12 @@
 
             trackAction() {
                 let songMenu = document.getElementsByTagName("li")
-        
+
                 for (let i = 0; i < songMenu.length; i++) {
-                    songMenu[i].onclick = function() {
-                        myAudioPlayer.changeTrack(i)
-                        myAudioPlayer.playSong()
+                    songMenu[i].onclick = (event) => {
+                        this.changeTrack(i)
+                        this.playSong()
+                        this.space_grap = "   *"
                     }
                 }
             }
