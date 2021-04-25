@@ -8,55 +8,83 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
         <script src="https://kit.fontawesome.com/4b97760acf.js" crossorigin="anonymous"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400&display=swap" rel="stylesheet">
     </head>
     <style>
         #mySongList {
-            width: 450px;
+            margin-top: 50px;
+            font-family: 'Antonio', sans-serif;
+            width: 420px;
+            text-align: center;
+            
         }
         #currentplay {
-            width: 450px;
+            width: 420px;
             padding-top: 10x;
             padding-left: 20px;
-            padding-right: 30px;
+            padding-right: 20px;
             border-style: solid;
             border-radius: 20px;
             padding-bottom: 20px;
         }
         #currentTitle {
+            font-family: 'Antonio', sans-serif;
+            margin-top: 20px;
+            width: 375px;
+            border-style: solid;
+            border-radius: 20px;
             padding-top: 20px;
+            padding-left: 15px;
             padding-bottom: 20px;
-            
+            background-color: #DAF7A6;
+            margin-bottom: 20px;
+        }
+        #myvolume {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+        #songHeader {
+            background-color: #51AEE4;
+            width: 420px;
+            margin-top: 100px;
+            text-align:center;
+        }
+        #mySongList.h3 {
+            border: solid;
         }
     </style>
     <body>
-            <div class="container-md" id="mySongList">My Song List
-                <div class="container-md">
-                    <ol></ol>
-                </div>
-                <ol></ol>
-            <div class="container-md">
-                <div id="currentplay">
-                    <div id="currentTitle"></div>
-                    <div id="controller">
-                        <audio id="myplayer" preload="metadata"></audio>
-                        <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
-                            <i class="fas fa-step-backward"></i>
-                        </button>
-                        <button type="button" class="btn btn-primary" id="playButton" onclick="myAudioPlayer.playSong()">
-                            <i class="far fa-play-circle"></i>
-                        </button>
-                        <button class="btn btn-success" onclick="myAudioPlayer.playNext()">
-                            <i class="fas fa-step-forward"></i>
-                        </button>
-                        <button class="btn btn-danger" onclick="myAudioPlayer.muteSound()">
-                            <i class="fas fa-volume-mute"></i>
-                        </button>
-                        <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
-                        <i id="myvolume" class="fas fa-volume-up"></i><input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
-                    </div>
-                </div>
+        <div class="container-md">
+
+            <div class="container-md" id="mySongList">
+                <h3>My Song Title</h3>
+                <ol class="list-group"></ol>
             </div>
+            <div class="container-md" id="currentplay">
+                <div id="currentTitle">No Song to Play</div>
+                <div id="controller">
+                    <audio id="myplayer" preload="metadata"></audio>
+                    <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="playButton" onclick="myAudioPlayer.playSong()">
+                        <i class="far fa-play-circle"></i>
+                    </button>
+                    <button class="btn btn-success" onclick="myAudioPlayer.playNext()">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button class="btn btn-danger" onclick="myAudioPlayer.muteSound()">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
+                    <i id="myvolume" class="fas fa-volume-up"></i><input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+                </div>
+            </div> 
         </div>
+        <div class="container-md">
+              
+        </div>  
     </body>
     <script>
 
@@ -80,10 +108,9 @@
             }
 
             loadSongMenu() {
-
-                this.songList = document.getElementById("mySongList").children[0].children[0]
+                this.songList = document.getElementById("mySongList").children[1]
                 for (let i = 0; i < this.myTrack.length; i++) {
-                   this.songList.innerHTML += `<li><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
+                   this.songList.innerHTML += `<li class=\"list-group-item\"><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
                    
                 }
             }
@@ -120,7 +147,7 @@
                     this.audioElement.ontimeupdate = (event) => {
                         this.current_play_sec = this.audioElement.currentTime
                         document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0] + 
-                            "       " + "   " +  
+                            "<span>     </span>" +  
                             parseInt(this.current_play_sec /60) + 
                             ":" + 
                             String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
@@ -129,7 +156,7 @@
                     
                     this.audioElement.onended = (event) => {
                         if (this.trackIndex < this.myTrack.length) {
-                            this.songStarted = false
+                            //this.songStarted = false
                             this.playNext()
                         }
                     }
@@ -167,7 +194,6 @@
             }
 
             playPrevious() {
-
                 if (this.trackIndex < 0) {
                     console.log("No more")
                     this.trackIndex = 0
@@ -181,7 +207,6 @@
             }
 
             pauseSong() {
-
                 if (!this.audioElement.paused) {
                     document.getElementById("playButton").children[0].setAttribute("class", "far fa-pause-circle")
                     this.audioElement.pause()
@@ -204,7 +229,7 @@
             }
 
             trackAction() {
-                let songMenu = document.getElementsByTagName("a")
+                let songMenu = document.getElementsByTagName("li")
         
                 for (let i = 0; i < songMenu.length; i++) {
                     songMenu[i].onclick = function() {
