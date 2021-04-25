@@ -1,21 +1,40 @@
 <!DOCTYPE html lang="en-US"> 
-
-    <title>
-        My player
-    </title>
+    <head>
+        <title>
+            My player
+        </title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+        <script src="https://kit.fontawesome.com/4b97760acf.js" crossorigin="anonymous"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
     <body>
-        <div id="mySongList">My Song List<ol></ol></div>
-        <div>
-            <div id="currentplay"></div>
-            <audio id="myplayer" preload="metadata"></audio>
-        </div>
-        <div>
-            <button onclick="myAudioPlayer.playPrevious()">Previous</button>
-            <button id="playButton" onclick="myAudioPlayer.playSong()">Play</button>
-            <button onclick="myAudioPlayer.playNext()">Next</button>
-            <button onclick="myAudioPlayer.muteSound()">Mute</button>
-            <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
-            Volume:  <input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+            <div class="container-md" id="mySongList">My Song List
+                <div class="container-md">
+                    <ol></ol>
+                </div>
+                <ol></ol>
+            <div class="container-md">
+                <div id="currentplay"></div>
+                <audio id="myplayer" preload="metadata"></audio>
+            </div>
+            <div class="container-md">
+                <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
+                    <i class="fas fa-step-backward"></i>
+                </button>
+                <button type="button" class="btn btn-primary" id="playButton" onclick="myAudioPlayer.playSong()">
+                    <i class="far fa-play-circle"></i>
+                </button>
+                <button class="btn btn-success" onclick="myAudioPlayer.playNext()">
+                    <i class="fas fa-step-forward"></i>
+                </button>
+                <button class="btn btn-danger" onclick="myAudioPlayer.muteSound()">
+                    <i class="fas fa-volume-mute"></i>
+                </button>
+                <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
+                <i id="myvolume" class="fas fa-volume-up"></i><input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+            </div>
         </div>
     </body>
     <script>
@@ -41,15 +60,21 @@
 
             loadSongMenu() {
 
-               this.songList = document.getElementById("mySongList").children[0]
-               for (let i = 0; i < this.myTrack.length; i++) {
+                this.songList = document.getElementById("mySongList").children[0].children[0]
+                for (let i = 0; i < this.myTrack.length; i++) {
                    this.songList.innerHTML += `<li><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
                    
-               }
+                }
             }
 
             changeVolume(value) {
                 this.audioElement.volume = value/100
+
+                if (this.audioElement.volume == 0) {
+                    document.getElementById("myvolume").setAttribute("class", "fas fa-volume-mute")
+                } else {
+                    document.getElementById("myvolume").setAttribute("class", "fas fa-volume-up")   
+                }
             }
 
             displayTime() {
@@ -73,9 +98,13 @@
                     
                     this.audioElement.ontimeupdate = (event) => {
                         this.current_play_sec = this.audioElement.currentTime
-                        document.getElementById("currentplay").innerHTML = parseInt(this.current_play_sec /60) + 
-                            ":" + String(parseInt(this.current_play_sec % 60)).padStart(2, "0") 
-                            + " / " + this.duration_sec
+                        document.getElementById("currentplay").innerHTML = "Current Playing: " + 
+                            this.myTrack[this.trackIndex].split(".")[0] + 
+                            "       " + "   " +  
+                            parseInt(this.current_play_sec /60) + 
+                            ":" + 
+                            String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
+                            " / " + this.duration_sec
                     }
                     
                     this.audioElement.onended = (event) => {
@@ -134,11 +163,11 @@
             pauseSong() {
 
                 if (!this.audioElement.paused) {
-                    document.getElementById("playButton").innerHTML = "Pause"
+                    document.getElementById("playButton").children[0].setAttribute("class", "far fa-pause-circle")
                     this.audioElement.pause()
 
                 } else {
-                    document.getElementById("playButton").innerHTML = "Play"
+                    document.getElementById("playButton").children[0].setAttribute("class", "far fa-play-circle")
                     this.audioElement.play()
                 }
             }
