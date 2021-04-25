@@ -9,6 +9,25 @@
         <script src="https://kit.fontawesome.com/4b97760acf.js" crossorigin="anonymous"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
+    <style>
+        #mySongList {
+            width: 450px;
+        }
+        #currentplay {
+            width: 450px;
+            padding-top: 10x;
+            padding-left: 20px;
+            padding-right: 30px;
+            border-style: solid;
+            border-radius: 20px;
+            padding-bottom: 20px;
+        }
+        #currentTitle {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            
+        }
+    </style>
     <body>
             <div class="container-md" id="mySongList">My Song List
                 <div class="container-md">
@@ -16,24 +35,26 @@
                 </div>
                 <ol></ol>
             <div class="container-md">
-                <div id="currentplay"></div>
-                <audio id="myplayer" preload="metadata"></audio>
-            </div>
-            <div class="container-md">
-                <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
-                    <i class="fas fa-step-backward"></i>
-                </button>
-                <button type="button" class="btn btn-primary" id="playButton" onclick="myAudioPlayer.playSong()">
-                    <i class="far fa-play-circle"></i>
-                </button>
-                <button class="btn btn-success" onclick="myAudioPlayer.playNext()">
-                    <i class="fas fa-step-forward"></i>
-                </button>
-                <button class="btn btn-danger" onclick="myAudioPlayer.muteSound()">
-                    <i class="fas fa-volume-mute"></i>
-                </button>
-                <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
-                <i id="myvolume" class="fas fa-volume-up"></i><input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+                <div id="currentplay">
+                    <div id="currentTitle"></div>
+                    <div id="controller">
+                        <audio id="myplayer" preload="metadata"></audio>
+                        <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button type="button" class="btn btn-primary" id="playButton" onclick="myAudioPlayer.playSong()">
+                            <i class="far fa-play-circle"></i>
+                        </button>
+                        <button class="btn btn-success" onclick="myAudioPlayer.playNext()">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="myAudioPlayer.muteSound()">
+                            <i class="fas fa-volume-mute"></i>
+                        </button>
+                        <!-- #scrubber input type="range" min="0" max="100" value="0" id="time_slider" onchange="displayTime()"-->
+                        <i id="myvolume" class="fas fa-volume-up"></i><input type="range" min="0" max="100" value="50" onchange="myAudioPlayer.changeVolume(this.value)">
+                    </div>
+                </div>
             </div>
         </div>
     </body>
@@ -98,8 +119,7 @@
                     
                     this.audioElement.ontimeupdate = (event) => {
                         this.current_play_sec = this.audioElement.currentTime
-                        document.getElementById("currentplay").innerHTML = "Current Playing: " + 
-                            this.myTrack[this.trackIndex].split(".")[0] + 
+                        document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0] + 
                             "       " + "   " +  
                             parseInt(this.current_play_sec /60) + 
                             ":" + 
