@@ -60,9 +60,9 @@
                 <ol class="list-group"></ol>
             </div>
             <div class="container-md" id="currentplay">
-                <div id="currentTitle">No Song to Play</div>
+                <div id="currentTitle">***************** No Song To Play ******************</div>
                 <div id="controller">
-                    <audio id="myplayer" preload="metadata"></audio>
+                    <audio id="myplayer" controls preload="metadata"></audio>
                     <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
                         <i class="fas fa-step-backward"></i>
                     </button>
@@ -156,8 +156,8 @@
                                 this.plotted = false
                             }
                         }
-
-                        document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0] + 
+                        //the display can hold up to 52 characters
+                        document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
                             this.space_grap +  " " + 
                             parseInt(this.current_play_sec /60) + 
                             ":" + 
@@ -172,12 +172,21 @@
                             this.playNext()
                         }
                     }
+                } else {
+                    this.resetJuke()
+                    this.loadSong()
                 }
             }
 
             changeTrack(trackNumber) {
                 this.songStarted = false
                 this.trackIndex = trackNumber
+            }
+
+            resetJuke() {
+                this.trackIndex = 0
+                this.space_grap = "   *"
+                this.songStarted = false
             }
 
             playSong() {
@@ -195,29 +204,29 @@
 
             playNext() {
                 if (this.trackIndex >= this.myTrack.length - 1) {
-                    console.log("Exceed")
-                    this.trackIndex = 0
+                    document.getElementById("currentTitle").innerHTML = "You are at Last Track"
+                    //this.trackIndex = 0
 
                 } else {
-                    this.songStarted= false
-                    this.trackIndex++
                     this.playSong()
                 }
+                this.songStarted= false
                 this.space_grap = "   *"
+                this.trackIndex++
             }
 
             playPrevious() {
+                this.trackIndex--
                 if (this.trackIndex < 0) {
-                    console.log("No more")
-                    this.trackIndex = 0
+                    document.getElementById("currentTitle").innerHTML = "You are at the First Track"
+                    //this.trackIndex = 0
 
                 } else {
-                    this.songStarted = false
-                    this.trackIndex--
                     this.playSong()
 
                 }
                 this.space_grap = "   *"
+                this.songStarted = false
             }
 
             pauseSong() {
@@ -262,7 +271,8 @@
             "桜流し (2021 Remastered).flac",
             "Merry Christmas Mr Lawrence - FYI.flac",
             "Come Back To Me.flac",
-            "Prisoner Of Love.flac"
+            "Prisoner Of Love.flac",
+            "In My Room.flac"
         ]
         
         let myAudioPlayer = new AudioPlayer(myTrack)
