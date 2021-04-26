@@ -127,7 +127,7 @@
             }
 
             loadSong() {
-                if (!((this.trackIndex >= this.myTrack.length) || (this.trackIndex < 0))) {
+                if (!((this.trackIndex >= this.myTrack.length))) {
                     this.songStarted = true 
 
                     this.audioElement.src = this.myTrack[this.trackIndex]
@@ -172,10 +172,15 @@
                             this.playNext()
                         }
                     }
-                } else {
+                } else if (this.trackIndex < -1) {
                     this.resetJuke()
                     this.loadSong()
                 }
+                /**else {
+                    this.resetJuke()
+                    //this.loadSong()
+                }
+                **/
             }
 
             changeTrack(trackNumber) {
@@ -219,8 +224,7 @@
             }
 
             playPrevious() {
-                console.log(this.trackIndex)
-                if (this.trackIndex < 0) {
+                if (this.trackIndex <= 0) {
                     document.getElementById("currentTitle").innerHTML = "You are at the First Track"
                     //this.trackIndex = 0
 
