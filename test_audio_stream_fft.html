@@ -1,0 +1,83 @@
+<!DOCTYPE html lang="en-US" html>
+    <head>
+        <title>
+            My Web API player
+        </title>
+    </head>
+    <body>
+        <button id="display_switch">Click for Sound</button>
+        <div id="my_audio_handler">
+            <audio 
+                controls id="my_audio_player" 
+                src="http://127.0.0.1:8088/static/one_last_kiss.flac" crossorigin="anonymous"></audio>
+        </div>
+        <div id="music_board">
+            <canvas 
+                id="my_music_drawing" width="420" height="100"
+                style="border: solid;"
+            ></canvas>
+        </div>
+    </body>
+    <script>
+
+        var buttonClicked = false
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var myAudio = document.querySelector('audio');
+        myAudio.crossOrigin = "anonymous";
+        var source = audioCtx.createMediaElementSource(myAudio);
+        var myAnalyzer = audioCtx.createAnalyser();
+        source.connect(myAnalyzer);
+
+        myAnalyzer.connect(audioCtx.destination);
+        myAnalyzer.fftSize = 4096;
+
+        var bufferLength = myAnalyzer.frequencyBinCount;
+        console.log(bufferLength)
+        var dataArray = new Uint8Array(bufferLength);
+        let canvas = document.getElementById("my_music_drawing")
+
+        let ctx = canvas.getContext("2d")
+        let WIDTH = canvas.width;
+        let HEIGHT = canvas.height;
+        let barWidth = (WIDTH / bufferLength) * 2.5
+        let barHeight
+        let x = 0
+        function renderFrame() {
+            requestAnimationFrame(renderFrame);
+            x = 0;
+            myAnalyzer.getByteFrequencyData(dataArray);
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i] * 0.3;
+                
+                let r = barHeight + (25 * (i/bufferLength));
+                let g = 250 * (i/bufferLength);
+                let b = 100;
+
+                ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+                ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+                //x += barWidth + 1;
+                x += barWidth;
+            }
+        }
+        renderFrame()
+    
+        document.querySelector('button').addEventListener('click', function() {
+            buttonClicked = !buttonClicked
+            if (buttonClicked) {
+                audioCtx.resume().then(() => {
+                console.log('Playback resumed successfully');
+                 
+                });
+            } else {
+                audioCtx.suspend().then(() => {
+                    console.log('Playback stopnned successfully');
+                });
+            }
+
+        });
+
+    </script>
+</html>

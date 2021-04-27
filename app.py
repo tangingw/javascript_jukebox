@@ -1,7 +1,16 @@
 from flask import Flask, jsonify
+from flask import render_template
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
+
+
+@app.route("/jukebox")
+def run_jukebox():
+
+    return render_template("test.html")
 
 @app.route("/getsong")
 def get_songs():
