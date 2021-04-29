@@ -297,6 +297,49 @@
 
         }
 
+        //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
+        class myAudioContext {
+
+            audioCtx
+            myAudio
+            mySource
+            myAnalyzer
+            contextArray
+
+            constructor(audioElement) {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this.myAudio = document.querySelector('audio');
+                this.myAudio.crossOrigin = "anonymous";
+
+                this.mySource = this.audioCtx.createMediaElementSource(this.myAudio);
+                this.myAnalyzer = this.audioCtx.createAnalyser();
+            }
+
+            getAnalyzerContext() {
+                return this.myAnalyzer
+            }
+
+            getAudioContext() {
+                return this.audioCtx
+            }
+
+            connectContext() {
+
+                this.mySource.connect(this.myAnalyzer)
+                this.myAnalyzer.connect(this.audioCtx.destination)
+            }
+
+            getBufferLength() {
+                return this.myAnalyzer.frequencyBinCount;
+            }
+
+            createDataArray(fftSize) {
+                this.myAnalyzer.fftSize = fftSize
+                return new Uint8Array(this.getBufferLength());
+            }
+        }
+
+        //main execution
         let myTrack = [
             "time.flac",
             "one_last_kiss.flac",
@@ -304,26 +347,23 @@
             "Merry Christmas Mr Lawrence - FYI.flac",
             "Come Back To Me.flac",
             "Prisoner Of Love.flac",
-            "In My Room.flac"
+            "In My Room.flac",
+            "Stay Gold.flac",
+            "Beautiful World (2021 Remastered).flac",
+            "COLORS.m4a"
         ]
         
-        let myAudioPlayer = new AudioPlayer(myTrack)
-
-        //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
         let buttonClicked = false
-        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let myAudio = document.querySelector('audio');
+
+        let myAudioPlayer = new AudioPlayer(myTrack)        
+        let my_audio_ctx = new myAudioContext()
+
+        my_audio_ctx.connectContext()
         
-        myAudio.crossOrigin = "anonymous";
-        let mySource = audioCtx.createMediaElementSource(myAudio);
-        let myAnalyzer = audioCtx.createAnalyser();
-        mySource.connect(myAnalyzer);
+        //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
+        let dataArray = my_audio_ctx.createDataArray(16384)
+        let bufferLength = my_audio_ctx.getBufferLength()
 
-        myAnalyzer.connect(audioCtx.destination);
-        myAnalyzer.fftSize = 4096;
-
-        let bufferLength = myAnalyzer.frequencyBinCount;
-        let dataArray = new Uint8Array(bufferLength);
         let canvas = document.getElementById("my_music_drawing")
 
         let ctx = canvas.getContext("2d")
@@ -335,9 +375,11 @@
         let barHeight
 
         function renderFrame() {
-            requestAnimationFrame(renderFrame);
+
             let x = 0;
-            myAnalyzer.getByteFrequencyData(dataArray);
+
+            requestAnimationFrame(renderFrame);
+            my_audio_ctx.getAnalyzerContext().getByteFrequencyData(dataArray);
 
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -353,17 +395,18 @@
                 x += barWidth;
             }
         }
+
         renderFrame()
     
         document.getElementById("display_switch").addEventListener('click', function() {
             buttonClicked = !buttonClicked
             if (buttonClicked) {
-                audioCtx.resume().then(() => {
+                my_audio_ctx.getAudioContext().resume().then(() => {
                 console.log('Playback resumed successfully');
                  
                 });
             } else {
-                audioCtx.suspend().then(() => {
+                my_audio_ctx.getAudioContext().suspend().then(() => {
                     console.log('Playback stopped successfully');
                 });
             }
