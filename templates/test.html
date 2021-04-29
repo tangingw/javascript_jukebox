@@ -297,49 +297,6 @@
 
         }
 
-        //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
-        class myAudioContext {
-
-            audioCtx
-            myAudio
-            mySource
-            myAnalyzer
-            contextArray
-
-            constructor(audioElement) {
-                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                this.myAudio = document.querySelector('audio');
-                this.myAudio.crossOrigin = "anonymous";
-
-                this.mySource = this.audioCtx.createMediaElementSource(this.myAudio);
-                this.myAnalyzer = this.audioCtx.createAnalyser();
-            }
-
-            getAnalyzerContext() {
-                return this.myAnalyzer
-            }
-
-            getAudioContext() {
-                return this.audioCtx
-            }
-
-            connectContext() {
-
-                this.mySource.connect(this.myAnalyzer)
-                this.myAnalyzer.connect(this.audioCtx.destination)
-            }
-
-            getBufferLength() {
-                return this.myAnalyzer.frequencyBinCount;
-            }
-
-            createDataArray(fftSize) {
-                this.myAnalyzer.fftSize = fftSize
-                return new Uint8Array(this.getBufferLength());
-            }
-        }
-
-        //main execution
         let myTrack = [
             "time.flac",
             "one_last_kiss.flac",
@@ -347,23 +304,26 @@
             "Merry Christmas Mr Lawrence - FYI.flac",
             "Come Back To Me.flac",
             "Prisoner Of Love.flac",
-            "In My Room.flac",
-            "Stay Gold.flac",
-            "Beautiful World (2021 Remastered).flac",
-            "COLORS.m4a"
+            "In My Room.flac"
         ]
         
-        let buttonClicked = false
+        let myAudioPlayer = new AudioPlayer(myTrack)
 
-        let myAudioPlayer = new AudioPlayer(myTrack)        
-        let my_audio_ctx = new myAudioContext()
-
-        my_audio_ctx.connectContext()
-        
         //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
-        let dataArray = my_audio_ctx.createDataArray(16384)
-        let bufferLength = my_audio_ctx.getBufferLength()
+        let buttonClicked = false
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let myAudio = document.querySelector('audio');
+        
+        myAudio.crossOrigin = "anonymous";
+        let mySource = audioCtx.createMediaElementSource(myAudio);
+        let myAnalyzer = audioCtx.createAnalyser();
+        mySource.connect(myAnalyzer);
 
+        myAnalyzer.connect(audioCtx.destination);
+        myAnalyzer.fftSize = 4096;
+
+        let bufferLength = myAnalyzer.frequencyBinCount;
+        let dataArray = new Uint8Array(bufferLength);
         let canvas = document.getElementById("my_music_drawing")
 
         let ctx = canvas.getContext("2d")
@@ -375,11 +335,9 @@
         let barHeight
 
         function renderFrame() {
-
-            let x = 0;
-
             requestAnimationFrame(renderFrame);
-            my_audio_ctx.getAnalyzerContext().getByteFrequencyData(dataArray);
+            let x = 0;
+            myAnalyzer.getByteFrequencyData(dataArray);
 
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -395,18 +353,17 @@
                 x += barWidth;
             }
         }
-
         renderFrame()
     
         document.getElementById("display_switch").addEventListener('click', function() {
             buttonClicked = !buttonClicked
             if (buttonClicked) {
-                my_audio_ctx.getAudioContext().resume().then(() => {
+                audioCtx.resume().then(() => {
                 console.log('Playback resumed successfully');
                  
                 });
             } else {
-                my_audio_ctx.getAudioContext().suspend().then(() => {
+                audioCtx.suspend().then(() => {
                     console.log('Playback stopped successfully');
                 });
             }
