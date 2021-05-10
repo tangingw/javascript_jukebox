@@ -120,6 +120,7 @@
             songList = null
             space_grap = "   *"
             plotted = false
+            currentVolume = 0.5;
 
             constructor(myTrack) {
 
@@ -140,7 +141,8 @@
             }
 
             changeVolume(value) {
-                this.audioElement.volume = value/100
+                this.currentVolume = value/100
+                this.audioElement.volume = this.currentVolume
 
                 if (this.audioElement.volume == 0) {
                     document.getElementById("myvolume").setAttribute("class", "fas fa-volume-mute")
@@ -158,9 +160,9 @@
                     this.songStarted = true 
 
                     this.audioElement.src = "http://127.0.0.1:8088/static/" + this.myTrack[this.trackIndex]
-                    this.audioElement.volume = 0.5
+                    this.audioElement.volume = this.currentVolume
+
                     this.audioElement.play()
- 
                     this.changeColor(this.trackIndex)
                     
                     this.audioElement.onloadedmetadata = (event) => {
@@ -346,7 +348,10 @@
             "Merry Christmas Mr Lawrence - FYI.flac",
             "Come Back To Me.flac",
             "Prisoner Of Love.flac",
-            "In My Room.flac"
+            "In My Room.flac",
+            "Stay Gold.flac",
+            "COLORS.m4a",
+            "Heart Station.flac"
         ]
         
         let buttonClicked = false
