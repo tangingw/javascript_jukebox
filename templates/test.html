@@ -155,6 +155,15 @@
                 document.getElementById("time_slider").value = parseInt((this.audioElement.currentTime/this.audioElement.duration) * 100)
             }
 
+            displaySongInfo() {
+                document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
+                    this.space_grap +  " " + 
+                    parseInt(this.current_play_sec /60) + 
+                    ":" + 
+                    String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
+                    " / " + this.duration_sec
+            }
+
             loadSong() {
                 if (!((this.trackIndex >= this.myTrack.length))) {
                     this.songStarted = true 
@@ -167,7 +176,7 @@
                     
                     this.audioElement.onloadedmetadata = (event) => {
                         this.duration_sec = this.audioElement.duration
-                        this.duration_sec = parseInt(this.duration_sec / 60) + ":" + parseInt(this.duration_sec % 60)
+                        this.duration_sec = parseInt(this.duration_sec / 60) + ":" + String(parseInt(this.duration_sec % 60)).padStart(2, "0")
                     }
                     
                     this.audioElement.ontimeupdate = (event) => {
@@ -185,13 +194,8 @@
                                 this.plotted = false
                             }
                         }
-                        //the display can hold up to 52 characters
-                        document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
-                            this.space_grap +  " " + 
-                            parseInt(this.current_play_sec /60) + 
-                            ":" + 
-                            String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
-                            " / " + this.duration_sec
+                       
+                        this.displaySongInfo()
                     }
                     
                     this.audioElement.onended = (event) => {
@@ -327,8 +331,8 @@
 
             connectContext() {
 
-            this.mySource.connect(this.myAnalyzer)
-            this.myAnalyzer.connect(this.audioCtx.destination)
+                this.mySource.connect(this.myAnalyzer)
+                this.myAnalyzer.connect(this.audioCtx.destination)
             }
 
             getBufferLength() {
@@ -351,7 +355,15 @@
             "In My Room.flac",
             "Stay Gold.flac",
             "COLORS.m4a",
-            "Heart Station.flac"
+            "Heart Station.flac",
+            "Play A Love Song.FLAC",
+            "Face My Fears (Japanese Version).flac",
+            "12 - キレイな人 (Find Love).flac",
+            "01 - BADモード.flac",
+            "01 道.flac",
+            "01 Play A Love Song.flac",
+            "04 - PINK BLOOD.flac",
+            "02 - 君に夢中.flac"
         ]
         
         let buttonClicked = false
@@ -362,7 +374,9 @@
         my_audio_ctx.connectContext()
         
         //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
-        let dataArray = my_audio_ctx.createDataArray(16384)
+        let fftLength = 16384
+        //let fftLength = 4096
+        let dataArray = my_audio_ctx.createDataArray(fftLength/2)
         let bufferLength = my_audio_ctx.getBufferLength()
 
         let canvas = document.getElementById("my_music_drawing")
@@ -372,7 +386,7 @@
         let WIDTH = canvas.width;
         let HEIGHT = canvas.height;
 
-        let barWidth = (WIDTH / bufferLength) * 2.5
+        let barWidth = (WIDTH / bufferLength) * 0.875
         let barHeight
 
         function renderFrame() {
