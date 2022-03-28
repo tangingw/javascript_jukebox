@@ -1,2 +1,3 @@
 *.flac
 static/*.*
+song_folder/*.*

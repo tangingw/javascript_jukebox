@@ -15,7 +15,7 @@
         #mySongList {
             margin-top: 50px;
             font-family: 'Antonio', sans-serif;
-            width: 420px;
+            width: 400px;
             text-align: center;
             border: solid;
             border-top-left-radius: 20px;
@@ -25,7 +25,7 @@
             background-color: #AED6F1;
         }
         #currentplay {
-            width: 420px;
+            width: 400px;
             padding-top: 10x;
             padding-left: 20px;
             padding-right: 20px;
@@ -38,11 +38,12 @@
         #currentTitle {
             font-family: 'Antonio', sans-serif;
             margin-top: 20px;
-            width: 375px;
+            width: 352px;
             border-style: solid;
             border-radius: 20px;
             padding-top: 20px;
             padding-left: 15px;
+            padding-right: 15px;
             padding-bottom: 20px;
             background-color: #DAF7A6;
             margin-bottom: 20px;
@@ -53,34 +54,36 @@
         }
         #songHeader {
             background-color: #51AEE4;
-            width: 420px;
+            width: 400px;
             margin-top: 100px;
             text-align:center;
         }
         #music_board {
             border: solid; 
-            width: 420;
+            width: 400;
             background-color: #AED6F1;
         }
         #list-menu {
             height: 300px;
+            text-align: left;
             overflow:auto;
         }
-
+        #my_music_drawing {
+            width: 348px;
+            height: 100px;
+            display: inline;
+        }
     </style>
     <body>
         <div class="container-sm" id="mySongList">
-            <h3>My Song Title</h3>
+            <h3>My JukeBox</h3>
             <div id="list-menu">
                 <ol class="list-group"></ol> 
             </div>            
         </div>
         <div class="container-sm" id="music_board">
             <div class="container-sm" id="my_display" style="padding-right: 10px;">
-                <canvas 
-                    id="my_music_drawing" width="368" height="100"
-                    style="display: inline;"
-                ></canvas>
+                <canvas id="my_music_drawing"></canvas>
             </div>
             <div class="container-sm">
                 <div id="switch">
@@ -90,7 +93,7 @@
         </div>
 
         <div class="container-sm" id="currentplay">
-            <div id="currentTitle">***************** No Song To Play ******************</div>
+            <div id="currentTitle">*************** No Song To Play ****************</div>
             <div id="controller">
                 <audio id="myplayer" preload="metadata"></audio>
                 <button class="btn btn-warning" onclick="myAudioPlayer.playPrevious()">
@@ -111,201 +114,8 @@
         </div>
             
     </body>
+    <script src="static/js/audio_player.js"></script>
     <script>
-
-        class AudioPlayer {
-
-            duration_sec = 0
-            current_play_sec = 0
-            trackIndex = 0
-            myTrack = null
-            audioElement = null
-            songStarted = false
-            songList = null
-            space_grap = "   *"
-            plotted = false
-            currentVolume = 0.5;
-
-            constructor(myTrack) {
-
-                this.myTrack = myTrack
-                this.audioElement = document.getElementById("myplayer")
-
-                this.loadSongMenu()
-                this.trackAction()
-                this.changeColor(this.trackIndex)
-            }
-
-            loadSongMenu() {
-                this.songList = document.getElementById("list-menu").children[0]
-                for (let i = 0; i < this.myTrack.length; i++) {
-                   this.songList.innerHTML += `<li class=\"list-group-item\"><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
-                   
-                }
-            }
-
-            changeVolume(value) {
-                this.currentVolume = value/100
-                this.audioElement.volume = this.currentVolume
-
-                if (this.audioElement.volume == 0) {
-                    document.getElementById("myvolume").setAttribute("class", "fas fa-volume-mute")
-                } else {
-                    document.getElementById("myvolume").setAttribute("class", "fas fa-volume-up")   
-                }
-            }
-
-            displayTime() {
-                document.getElementById("time_slider").value = parseInt((this.audioElement.currentTime/this.audioElement.duration) * 100)
-            }
-
-            displaySongInfo() {
-                document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
-                    this.space_grap +  " " + 
-                    parseInt(this.current_play_sec /60) + 
-                    ":" + 
-                    String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
-                    " / " + this.duration_sec
-            }
-
-            loadSong() {
-                if (!((this.trackIndex >= this.myTrack.length))) {
-                    this.songStarted = true 
-
-                    this.audioElement.src = "/static/" + this.myTrack[this.trackIndex]
-                    this.audioElement.volume = this.currentVolume
-
-                    this.audioElement.play()
-                    this.changeColor(this.trackIndex)
-                    
-                    this.audioElement.onloadedmetadata = (event) => {
-                        this.duration_sec = this.audioElement.duration
-                        this.duration_sec = parseInt(this.duration_sec / 60) + ":" + String(parseInt(this.duration_sec % 60)).padStart(2, "0")
-                    }
-                    
-                    this.audioElement.ontimeupdate = (event) => {
-                        this.current_play_sec = this.audioElement.currentTime
-
-                        if (parseInt(this.current_play_sec) % 45 == 0) {
-
-                            if (!this.plotted) {
-                                this.space_grap += "*"
-                                this.plotted = !this.plotted
-                            }
-                               
-                        } else {
-                            if(this.plotted) {
-                                this.plotted = false
-                            }
-                        }
-                       
-                        this.displaySongInfo()
-                    }
-                    
-                    this.audioElement.onended = (event) => {
-                        if (this.trackIndex < this.myTrack.length) {
-                            //this.songStarted = false
-                            this.space_grap = "   *"
-                            this.playNext()
-                        }
-                    }
-                } else if (this.trackIndex < -1) {
-                    this.resetJuke()
-                    this.loadSong()
-                }
-            }
-
-            changeTrack(trackNumber) {
-                this.songStarted = false
-                this.trackIndex = trackNumber
-            }
-
-            resetJuke() {
-                this.trackIndex = 0
-                this.space_grap = "   *"
-                this.songStarted = false
-            }
-
-            playSong() {
-                if (this.songStarted) {
-                    this.pauseSong()
-
-                } else {
-                    this.loadSong()
-                }
-            }
-
-            muteSound() {
-                this.audioElement.muted = !this.audioElement.muted
-            }
-
-            playNext() {
-
-                if (this.trackIndex >= this.myTrack.length - 1) {
-                    document.getElementById("currentTitle").innerHTML = "You are at Last Track"
-                    //this.trackIndex = 0
-
-                } else {
-                    this.trackIndex++
-                    this.songStarted= false
-                    this.playSong()
-
-                }
-                //this.songStarted= false
-                this.space_grap = "   *"
-            }
-
-            playPrevious() {
-                if (this.trackIndex <= 0) {
-                    document.getElementById("currentTitle").innerHTML = "You are at the First Track"
-                    //this.trackIndex = 0
-
-                } else {
-                    this.trackIndex--
-                    this.songStarted = false
-                    this.playSong()
-
-                }
-                this.space_grap = "   *"
-            }
-
-            pauseSong() {
-                if (!this.audioElement.paused) {
-                    document.getElementById("playButton").children[0].setAttribute("class", "far fa-pause-circle")
-                    this.audioElement.pause()
-
-                } else {
-                    document.getElementById("playButton").children[0].setAttribute("class", "far fa-play-circle")
-                    this.audioElement.play()
-                }
-            }
-
-            changeColor(index) {
-            
-                for (let i = 0; i < this.songList.children.length; i++) {
-                    this.songList.children[i].style.backgroundColor = "\#FCF3CF"
-                    this.songList.children[i].style.color = "black"
-                }
-
-                if (index < this.songList.children.length) {
-                    this.songList.children[index].style.backgroundColor = "\#D35400"
-                    this.songList.children[index].style.color = "white"
-                }
-            }
-
-            trackAction() {
-                let songMenu = document.getElementsByTagName("li")
-                for (let i = 0; i < songMenu.length; i++) {
-                    songMenu[i].onclick = (event) => {
-                        this.changeTrack(i)
-                        this.playSong()
-                        this.space_grap = "   *"
-                    }
-                }
-            }
-
-        }
-
         //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
         class myAudioContext {
 
@@ -349,24 +159,24 @@
         }
 
         let myTrack = [
-            "time.flac",
-            "one_last_kiss.flac",
-            "桜流し (2021 Remastered).flac",
-            "Merry Christmas Mr Lawrence - FYI.flac",
-            "Come Back To Me.flac",
-            "Prisoner Of Love.flac",
-            "In My Room.flac",
-            "Stay Gold.flac",
-            "COLORS.m4a",
-            "Heart Station.flac",
-            "Play A Love Song.FLAC",
-            "Face My Fears (Japanese Version).flac",
-            "12 - キレイな人 (Find Love).flac",
-            "01 - BADモード.flac",
-            "01 道.flac",
-            "01 Play A Love Song.flac",
-            "04 - PINK BLOOD.flac",
-            "02 - 君に夢中.flac"
+            "time",
+            "one_last_kiss",
+            "桜流し (2021 Remastered)",
+            "Merry Christmas Mr Lawrence - FYI",
+            "Come Back To Me",
+            "Prisoner Of Love",
+            "In My Room",
+            "Stay Gold",
+            "COLORS",
+            "Heart Station",
+            "Play A Love Song",
+            "Face My Fears (Japanese Version)",
+            "12 - キレイな人 (Find Love)",
+            "01 - BADモード",
+            "01 道",
+            "01 Play A Love Song",
+            "04 - PINK BLOOD",
+            "02 - 君に夢中"
         ]
         
         let buttonClicked = false

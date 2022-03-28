@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_file
 from flask import render_template
 from flask_cors import CORS
 
@@ -29,6 +29,12 @@ def get_hello():
 
     return "Hello world"
 
+@app.route("/my_song_folder/<song_name>")
+def get_song_file(song_name):
+
+    return send_file(
+        f"song_folder/{song_name}.flac", mimetype="audio/flac"
+    )
 
 if __name__ == "__main__":
 
