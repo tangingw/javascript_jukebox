@@ -30,7 +30,7 @@ class AudioPlayer {
            
         }
         this.songList.innerHTML += `
-            <li class=\"list-group-item\"><a id="upload_link" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add New Song</a></li>
+            <li class=\"list-group-item\" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><a id="upload_link">Add New Song</a></li>
         `
     }
 
@@ -50,8 +50,6 @@ class AudioPlayer {
     }
 
     displaySongInfo() {
-        console.log(this.trackIndex)
-        console.log(this.myTrack[this.trackIndex])
         document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
             this.space_grap +  " " + this.displayCurrentPlayTime()
     }
@@ -113,7 +111,6 @@ class AudioPlayer {
     }
 
     changeTrack(trackNumber) {
-        console.log("N")
         this.songStarted = false
 
         if (trackNumber < this.myTrack.length) {
