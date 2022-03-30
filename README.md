@@ -1,7 +1,7 @@
 # How to Use My JukeBox
 
-1. Create `static` folder
-2. Move all your songs to `static` folder
+1. Create `song_folder` folder
+2. Move all your songs to `song_folder` folder
 3. Proceed below if you have `python3.x installed`.
 
     ```python

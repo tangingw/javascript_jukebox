@@ -29,6 +29,9 @@ class AudioPlayer {
            this.songList.innerHTML += `<li class=\"list-group-item\"><a id=${i}>${myTrack[i].split(".")[0]}</a></li>`
            
         }
+        this.songList.innerHTML += `
+            <li class=\"list-group-item\"><a id="upload_link" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add New Song</a></li>
+        `
     }
 
     changeVolume(value) {
@@ -47,13 +50,10 @@ class AudioPlayer {
     }
 
     displaySongInfo() {
+        console.log(this.trackIndex)
+        console.log(this.myTrack[this.trackIndex])
         document.getElementById("currentTitle").innerHTML = this.myTrack[this.trackIndex].split(".")[0].slice(0, 35) + 
             this.space_grap +  " " + this.displayCurrentPlayTime()
-            /**parseInt(this.current_play_sec /60) + 
-            ":" + 
-            String(parseInt(this.current_play_sec % 60)).padStart(2, "0")  + 
-            " / " + this.duration_sec
-            **/
     }
 
     displayCurrentPlayTime(){
@@ -64,7 +64,6 @@ class AudioPlayer {
     }
     loadSong() {
         if (!((this.trackIndex >= this.myTrack.length))) {
-            let currentTitle = this.songList.children[this.trackIndex].children[0].innerHTML
             this.songStarted = true 
 
             this.audioElement.src = "/my_song_folder/" + this.myTrack[this.trackIndex]
@@ -114,8 +113,12 @@ class AudioPlayer {
     }
 
     changeTrack(trackNumber) {
+        console.log("N")
         this.songStarted = false
-        this.trackIndex = trackNumber
+
+        if (trackNumber < this.myTrack.length) {
+            this.trackIndex = trackNumber
+        }
     }
 
     resetJuke() {
@@ -138,7 +141,6 @@ class AudioPlayer {
     }
 
     playNext() {
-
         if (this.trackIndex >= this.myTrack.length - 1) {
             document.getElementById("currentTitle").innerHTML = "You are at Last Track"
             //this.trackIndex = 0
@@ -186,17 +188,10 @@ class AudioPlayer {
     }
 
     changeColor(index) {
-        console.log(this.songList.children[index])
-
         if (index < this.songList.children.length) {
             this.songList.children[index].style.backgroundColor = "\#D35400"
             this.songList.children[index].style.color = "white"
-            /**
-            let currentTitle = this.songList.children[index].children[0].innerHTML
-            this.songList.children[index].children[0].ontimeupdate = (event) => {
-                this.songList.children[index].children[0].innerHTML = currentTitle + " " + this.displayCurrentPlayTime()
-            }
-            **/
+
             if (this.previous_index != index) {
                 this.songList.children[this.previous_index].style.backgroundColor = "\#FCF3CF"
                 this.songList.children[this.previous_index].style.color = "black"
@@ -209,7 +204,7 @@ class AudioPlayer {
 
     trackAction() {
         let songMenu = document.getElementsByTagName("li")
-        for (let i = 0; i < songMenu.length; i++) {
+        for (let i = 0; i < songMenu.length - 1; i++) {
             songMenu[i].onclick = (event) => {
                 this.changeTrack(i)
                 this.playSong()
@@ -217,5 +212,4 @@ class AudioPlayer {
             }
         }
     }
-
 }
