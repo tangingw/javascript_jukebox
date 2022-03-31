@@ -98,6 +98,9 @@
         #equalizer_switch {
             font-weight: bold;
         }
+        #progress-container {
+            padding-top: 10px;
+        }
     </style>
     <body>
         <div class="container-sm" id="mySongList">
@@ -147,7 +150,12 @@
                     <input type="file" id="myfile" name="file" class="form-control">
                 </div>
                 
-                <div id="output"></div>
+                <div id="progress-container">
+                    <div class="progress" id="output" hidden></div>
+                </div>
+                
+                
+                
                 <div id="status-message"></div>
             </div>
             <div class="modal-footer">
@@ -289,19 +297,33 @@
 
         });
 
+        /**document.getElementById("myfile").onclick = function() {
+            let progress_output = document.getElementById("output")
+            progress_output.innerHTML = '<div id="output_progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 75%"></div>'
+        }
+
+        **/
         let uploadStatus = document.getElementById("status-message")
-        
+        let progress_output = document.getElementById("output")
+
         document.getElementById("upload").onclick = async function() {
             uploadStatus.innerHTML = ""    
             let formData = new FormData()
             formData.append("file", document.getElementById("myfile").files[0])
+
+            progress_output.innerHTML = '<div id="output_progress_bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>'
+            progress_output.hidden = false
             
             let config = {
                 onUploadProgress: function(progressEvent) {
                 document.getElementById("upload").disabled = true
                 document.getElementById("myfile").disabled = true
                 var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
-                document.getElementById('output').innerHTML = percentCompleted;
+                console.log(percentCompleted)
+                
+                document.getElementById('output_progress_bar').setAttribute("aria-valuenow", percentCompleted.toString())
+                document.getElementById('output_progress_bar').setAttribute("style", `width:${percentCompleted.toString()}%`)
+                
                 }
             };
             try {
@@ -314,8 +336,10 @@
                 console.log(error)
                 uploadStatus.innerHTML = error.message
             }
+
             document.getElementById("upload").disabled = false
             document.getElementById("myfile").disabled = false
+            progress_output.hidden = true
            
         }
     </script>
