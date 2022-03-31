@@ -1,4 +1,6 @@
 import os.path
+import glob
+import heapq
 from flask import Flask, jsonify, send_file
 from flask import render_template, abort, request
 from flask_cors import CORS
@@ -20,6 +22,10 @@ ALLOWED_EXTENSIONS = {'flac'}
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def sort_function(filename):
+
+    return os.path.getctime(filename)
 
 
 @app.errorhandler(405)
@@ -100,8 +106,20 @@ def get_song_file(song_name=None):
             }
         )
 
-    abort(403)
-
+    return jsonify(
+        {
+            "song_list": [
+                os.path.basename(my_file) 
+                for my_file in sorted(
+                    [
+                        file_name
+                        for file_name in glob.glob("song_folder/*.flac")
+                    ], key=lambda x: os.path.getctime(x)
+                )
+            ]   
+        }
+    )
+    
 
 @app.route("/metadata/<song_title>")
 def get_song_metadata(song_title):
