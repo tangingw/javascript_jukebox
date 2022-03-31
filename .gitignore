@@ -1,3 +1,4 @@
 *.flac
 static/*.*
 song_folder/*.*
+*.key

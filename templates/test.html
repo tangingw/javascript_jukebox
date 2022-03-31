@@ -1,4 +1,5 @@
-<!DOCTYPE html lang="en-US"> 
+<!DOCTYPE html> 
+<html lang="en-US"> 
     <head>
         <title>
             My player
@@ -9,6 +10,7 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/fontawesome.min.css" integrity="sha384-wESLQ85D6gbsF459vf1CiZ2+rr+CsxRY0RpiF1tLlQpDnAgg6rwdsUF1+Ics2bni" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://kit.fontawesome.com/4b97760acf.js" crossorigin="anonymous"></script>
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -62,17 +64,20 @@
             text-align:center;
         }
         #music_board {
-            border: solid; 
-            width: 400;
+            width: 400px;
+            text-align: center;
+            border: solid;
             background-color: #AED6F1;
         }
         #list-menu {
             height: 300px;
+            padding-left: 10px;
+            margin-right: 10px;
             text-align: left;
             overflow:auto;
         }
         #my_music_drawing {
-            width: 348px;
+            width: 352px;
             height: 100px;
             display: inline;
         }
@@ -84,6 +89,15 @@
             **/
             display:none;
         }
+        #switch-container {
+            text-align: left;
+            font-weight: bold;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        #equalizer_switch {
+            font-weight: bold;
+        }
     </style>
     <body>
         <div class="container-sm" id="mySongList">
@@ -93,16 +107,11 @@
             </div>            
         </div>
         <div class="container-sm" id="music_board">
-            <div class="container-sm" id="my_display" style="padding-right: 10px;">
-                <canvas id="my_music_drawing"></canvas>
-            </div>
-            <div class="container-sm">
-                <div id="switch">
-                    <button id="display_switch">Click for Display</button>
-                </div>
+            <canvas id="my_music_drawing"></canvas>
+            <div class="container-sm" id="switch-container">
+                <button id="equalizer_switch" class="btn btn-danger">Equalizer</button>
             </div>
         </div>
-
         <div class="container-sm" id="currentplay">
             <div id="currentTitle">*************** No Song To Play ****************</div>
             <div id="controller">
@@ -132,19 +141,23 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <label for="myfile">
-                <input type="file" id="myfile" name="file">
+                
+                <div class="col-md-12">
+                    <label for="myfile"></label>
+                    <input type="file" id="myfile" name="file" class="form-control">
+                </div>
+                
+                <div id="output"></div>
+                <div id="status-message"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Understood</button>
+                <button type="button" class="btn btn-primary" id="upload">Upload File</button>
             </div>
             </div>
         </div>
         </div>
     </body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js">
-    </script>
     <script src="static/js/audio_player.js"></script>
     <script>
         //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
@@ -243,7 +256,7 @@
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             for (let i = 0; i < bufferLength; i++) {
-                barHeight = dataArray[i] * 0.3;
+                barHeight = dataArray[i] * 0.5;
                 
                 let r = barHeight + (25 * (i/bufferLength));
                 let g = 200 * (i/bufferLength);
@@ -257,20 +270,53 @@
 
         renderFrame()
     
-        document.getElementById("display_switch").addEventListener('click', function() {
+        document.getElementById("equalizer_switch").addEventListener('click', function() {
             buttonClicked = !buttonClicked
             if (buttonClicked) {
                 my_audio_ctx.getAudioContext().resume().then(() => {
+                
+                document.getElementById("equalizer_switch").setAttribute("class", "btn btn-success")
                 console.log('Playback resumed successfully');
+
                  
                 });
             } else {
                 my_audio_ctx.getAudioContext().suspend().then(() => {
+                    document.getElementById("equalizer_switch").setAttribute("class", "btn btn-danger")
                     console.log('Playback stopped successfully');
                 });
             }
 
         });
 
+        let uploadStatus = document.getElementById("status-message")
+        
+        document.getElementById("upload").onclick = async function() {
+            uploadStatus.innerHTML = ""    
+            let formData = new FormData()
+            formData.append("file", document.getElementById("myfile").files[0])
+            
+            let config = {
+                onUploadProgress: function(progressEvent) {
+                document.getElementById("upload").disabled = true
+                document.getElementById("myfile").disabled = true
+                var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+                document.getElementById('output').innerHTML = percentCompleted;
+                }
+            };
+            try {
+                response = await axios.post(
+                    '/my_song_folder', formData, config
+                )
+                response_data = response.data
+                uploadStatus.innerHTML = response_data.message
+            } catch (error) {
+                console.log(error)
+                uploadStatus.innerHTML = error.message
+            }
+            document.getElementById("upload").disabled = false
+            document.getElementById("myfile").disabled = false
+           
+        }
     </script>
 </html>

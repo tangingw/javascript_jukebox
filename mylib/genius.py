@@ -8,7 +8,7 @@ def perform_get_operation(operation_type, params=None, data=None, json=None):
         "Content-Type": "application/json",
         "Host": "api.genius.com",
         "Accept": "application/json",
-        "Authorization": "Bearer FepQl9yYwF_hjGHYB_LyddQ9K4vUOsVk76OIpspr4FQrcai_77rIXpDsDxGKrJGo"
+        "Authorization": "Bearer <TOKEN>"
     }
 
     response = requests.get(

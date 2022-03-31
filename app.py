@@ -3,6 +3,7 @@ from flask import Flask, jsonify, send_file
 from flask import render_template, abort, request
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 from mylib.metaflac import MetaFlac
 
 
@@ -20,15 +21,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.errorhandler(403)
+
+@app.errorhandler(405)
 def return_not_found(error):
 
     return jsonify(
         {
-            "status": 403,
+            "status": 405,
             "error_msg": "method not allow"
         }
-    ), 403
+    ), 405
 
 
 @app.route("/jukebox")
@@ -56,7 +58,6 @@ def get_hello():
     return "Hello world"
 
 
-
 @app.route("/my_song_folder", methods=["GET", "POST"])
 @app.route("/my_song_folder/<song_name>")
 def get_song_file(song_name=None):
@@ -73,16 +74,33 @@ def get_song_file(song_name=None):
         if upload_file and allowed_file(upload_file.filename):
 
             filename = secure_filename(upload_file.filename)
-            upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filename_with_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
+            if not os.path.exists(filename_with_path):
+                upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                return jsonify(
+                    {
+                        "status": 200,
+                        "message": "Upload Successful"
+                    }
+                )
+        
             return jsonify(
                 {
-                    "status": 200,
-                    "message": "Upload Successful"
+                    "status": 514,
+                    "message": "Duplicate Filename"
                 }
             )
-    abort(403)
+        
+        return jsonify(
+            {
+                    "status": 513,
+                    "message": "Incorrect Filetype"
+            }
+        )
 
+    abort(403)
 
 
 @app.route("/metadata/<song_title>")
