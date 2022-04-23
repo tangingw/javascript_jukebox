@@ -238,7 +238,7 @@
         //code adapted from https://engineering.carsguide.com.au/javascripts-web-audio-api-3ad0e624945
         let fftLength = 16384
         //let fftLength = 4096
-        let dataArray = my_audio_ctx.createDataArray(fftLength/2)
+        let dataArray = my_audio_ctx.createDataArray(fftLength) 
         let bufferLength = my_audio_ctx.getBufferLength()
 
         let canvas = document.getElementById("my_music_drawing")
@@ -261,7 +261,7 @@
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
             for (let i = 0; i < bufferLength; i++) {
-                barHeight = dataArray[i] * 0.5;
+                barHeight = dataArray[i] * 0.60;
                 
                 let r = barHeight + (25 * (i/bufferLength));
                 let g = 200 * (i/bufferLength);
